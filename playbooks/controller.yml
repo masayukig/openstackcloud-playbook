@@ -11,3 +11,16 @@
         key: "{{ lookup('file', '/home/{{user}}/.ssh/id_{{item}}.pub')}}"
       with_items:
         - "{{ keys }}"
+    - name: Set hostname
+      command: hostname controller
+      become: true
+    - name: Set hostname file
+      vars:
+        host: "controller"
+      template:
+        src: templates/hostname.j2
+        dest: /etc/hostname
+        owner: root
+        group: root
+        mode: "0644"
+      become: true
