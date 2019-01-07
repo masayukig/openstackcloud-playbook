@@ -24,3 +24,145 @@
         group: root
         mode: "0644"
       become: true
+    - name: Unset IP address for provider interface
+      template:
+        src: templates/ifcfg.j2
+        dest: /etc/sysconfig/network/ifcfg-eth0
+        owner: root
+        group: root
+        mode: "0600"
+      become: true
+      # notify: reboot
+    - name: Update hosts
+      template:
+        src: templates/hosts.j2
+        dest: /etc/hosts
+        owner: root
+        group: root
+        mode: "0644"
+      become: true
+    - name: Update all package
+      zypper:
+        name: '*'
+        state: latest
+      become: true
+    - name: Install chrony
+      zypper:
+        name: chrony
+        state: present
+      become: true
+
+    - name: Update chrony setting
+      template:
+        src: templates/chrony.conf.j2
+        dest: /etc/chrony.conf
+        owner: root
+        group: chrony
+        mode: "0640"
+      become: true
+    - name: restart chronyd service
+      systemd:
+        name: chronyd.service
+        state: restarted
+        daemon_reload: yes
+        enabled: yes
+      become: true
+    - name: Add openstack repo
+      zypper_repository:
+        name: Rocky
+        repo: 'obs://Cloud:OpenStack:Rocky/openSUSE_Leap_15.0'
+        state: present
+      become: true
+    - name: Refresh all repos
+      zypper_repository:
+        repo: '*'
+        runrefresh: yes
+        auto_import_keys: true
+      become: true
+    - name: Remove conflict packages
+      zypper:
+        name: patterns-openSUSE-minimal_base-conflicts
+        state: absent
+      become: true
+    - name: dist-upgrade
+      zypper:
+        name: '*'
+        state: dist-upgrade
+        extra_args: '--no-allow-vendor-change --allow-arch-change'
+      become: true
+    - name: Install opnestack packages
+      zypper:
+        name: "{{ item }}"
+        state: present
+      with_items:
+        - python-openstackclient
+        - mariadb
+        - mariadb-client
+        - python-PyMySQL
+      become: true
+    - name: Configure mysql
+      template:
+        src: templates/openstack.cnf.j2
+        dest: /etc/my.cnf.d/openstack.cnf
+        owner: root
+        group: root
+        mode: "0644"
+      become: true
+      #    - name: stop mysql service
+      #      systemd:
+      #        name: mysql.service
+      #        state: stopped
+      #        enabled: yes
+      #      become: true
+      #
+      #    - name: check if mysql log file size is 0 or not
+      #      stat: path=/var/log/mysql/mysqld.log
+      #      register: log_file
+      #      changed_when: false
+      #      become: true
+      #
+      #    - name: initialize insecure mysql
+      #      command: mysqld --initialize-insecure --user=mysql
+      #      changed_when: false
+      #      when: log_file.stat.exists == False or log_file.stat.size == 0
+      #      become: true
+
+    - name: restart mysql service
+      systemd:
+        name: mysql.service
+        state: restarted
+        daemon_reload: yes
+        enabled: yes
+      become: true
+
+    # [FIXME] These are trying to pretend mysql_secure_installation,
+    # however, this doesn't work well for now, so,
+    # do `mysql_secure_installation` on the controller node as a workaround.
+    # And then, run the following playbook again.
+    #    - name: Set the root password
+    #      mysql_user: login_user=root login_password="{{ mysql_pass }}" user=root password="{{ mysql_pass }}" check_implicit_admin=yes login_unix_socket=/run/mysql/mysql.sock
+    #
+    #    - name: Secure the root user for IPV6 localhost (::1)
+    #      mysql_user: login_user=root login_password="{{ mysql_pass }}" user=root password="{{ mysql_pass }}" host="::1"
+    #
+    #    - name: Secure the root user for IPV4 localhost (127.0.0.1)
+    #      mysql_user: login_user=root login_password="{{ mysql_pass }}" user=root password="{{ mysql_pass }}" host="127.0.0.1"
+    #
+    #    - name: Secure the root user for localhost domain
+    #      mysql_user: login_user=root login_password="{{ mysql_pass }}" user=root password="{{ mysql_pass }}" host="localhost"
+    #
+    #    - name: Secure the root user for server_hostname domain
+    #      mysql_user: login_user=root login_password="{{ mysql_pass }}" user=root password="{{ mysql_pass }}" host="{{ ansible_fqdn }}"
+    #
+    #    - name: Deletes anonymous server user
+    #      mysql_user: login_user=root login_password="{{ mysql_pass }}" user="" host_all=yes state=absent
+    #
+    #    - name: Removes the test database
+    #      mysql_db: login_user=root login_password="{{ mysql_pass }}" db=test state=absent
+    #
+
+
+#  handlers:
+#    - name: reboot
+#      reboot:
+
