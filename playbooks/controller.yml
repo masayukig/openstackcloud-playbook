@@ -1,0 +1,13 @@
+- hosts: controller
+  tasks:
+    - name: Add authorized_key
+      vars:
+        user: "masayuki"
+        keys:
+          - ed25519
+          - rsa
+      authorized_key:
+        user: "{{ user }}"
+        key: "{{ lookup('file', '/home/{{user}}/.ssh/id_{{item}}.pub')}}"
+      with_items:
+        - "{{ keys }}"

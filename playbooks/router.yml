@@ -1,0 +1,12 @@
+---
+- hosts: router
+  tasks:
+  - name: Show the configuration for from eth0 to eth4
+  edgeos_command:
+    commands: show interfaces ethernet {{ item }}
+  loop:
+    - eth0
+    - eth1
+    - eth2
+    - eth3
+    - eth4
