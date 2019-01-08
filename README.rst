@@ -4,6 +4,10 @@ openstackcloud-playbook
 This project aims to build an openstack cloud along with the official
 installation guide. https://docs.openstack.org/install-guide
 
+.. WARNING::
+   This project is just for my excercise for OpenStack, ansible, etc.
+   So, please do not use this for a production environment :)
+
 How to use
 ----------
 
