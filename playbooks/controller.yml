@@ -317,7 +317,7 @@
       command: keystone-manage bootstrap --bootstrap-password '{{ admin_pass }}' --bootstrap-admin-url http://controller:5000/v3/ --bootstrap-internal-url http://controller:5000/v3/ --bootstrap-public-url http://controller:5000/v3/ --bootstrap-region-id RegionOne
     - name: Install apache2
       zypper:
-        name: ['apache2', 'apache2-mod_wsgi']
+        name: ['apache2','apache2-mod_wsgi']
         state: present
       become: yes
     - name: Configure the Apache HTTP server
@@ -351,6 +351,60 @@
         dest: '{{ ansible_env.HOME }}/admin-openrc'
     - name: Create a domain, projects, users, and roles
       script: files/create_keystone_resources.sh
+
+    #########################
+    # Glance
+    #########################
+    - name: Create glance database
+      mysql_db:
+        name: glance
+        state: present
+        login_user: root
+        login_password: '{{ mysql_pass }}'
+        login_unix_socket: /var/run/mysql/mysql.sock
+    - name: Grant proper access to the glance database
+      mysql_user:
+        name: glance
+        host: '{{ item }}'
+        priv: 'glance.*:ALL,GRANT'
+        password: '{{ glance_dbpass }}'
+        state: present
+        login_user: root
+        login_password: '{{ mysql_pass }}'
+        login_unix_socket: /var/run/mysql/mysql.sock
+      with_items:
+        - localhost
+        - '%'
+    - name: create the service credentials, endpoints
+      script: files/create_glance_resources.sh
+    - name: Install glance packages
+      zypper:
+        name: ['openstack-glance','openstack-glance-api','openstack-glance-registry']
+        state: present
+      become: yes
+    - name: put glance conf files
+      become: yes
+      template:
+        src: 'templates/{{ item.src }}'
+        dest: '/etc/glance/{{ item.dest }}'
+        owner: root
+        group: glance
+        mode: "0644"
+      with_items:
+        - {src: '010-glance-api-custom.conf.j2', dest: 'glance-api.conf.d/010-glance-api-custom.conf'}
+        - {src: '010-glance-registry-custom.conf.j2', dest: 'glance-registry.conf.d/010-glance-registry-custom.conf'}
+    - name: Start the Image services and configure them to start when the system boots
+      systemd:
+        name: '{{ item }}'
+        state: restarted
+        daemon_reload: yes
+        enabled: yes
+      become: yes
+      with_items:
+        - openstack-glance-api.service
+        - openstack-glance-registry.service
+    - name: Verify Glance operation
+      script: files/verify-glance.sh
 
 #  handlers:
 #    - name: reboot
