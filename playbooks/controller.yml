@@ -92,13 +92,8 @@
       become: true
     - name: Install opnestack packages
       zypper:
-        name: "{{ item }}"
+        name: ['python-openstackclient','mariadb','mariadb-client','python-PyMySQL']
         state: present
-      with_items:
-        - python-openstackclient
-        - mariadb
-        - mariadb-client
-        - python-PyMySQL
       become: true
     - name: Configure mysql
       template:
@@ -190,9 +185,9 @@
         state: present
       become: true
 
-#########################
-# Memcached
-#########################
+    #########################
+    # Memcached
+    #########################
     - name: Install memcached
       zypper:
         name: ['memcached','python-python-memcached']
@@ -210,6 +205,57 @@
     - name: restart memcached service
       systemd:
         name: memcached.service
+        state: restarted
+        daemon_reload: yes
+        enabled: yes
+      become: true
+
+    #########################
+    # etcd
+    #########################
+    - name: Add etcd group
+      group: name=etcd system=yes
+      become: true
+    - name: Add etcd user
+      user:
+        name: etcd
+        system: yes
+        home: /var/lib/etcd
+        shell: /bin/false
+        group: etcd
+      become: true
+    - name: Make directories
+      file:
+        path: '{{ item }}'
+        owner: etcd
+        group: etcd
+        state: directory
+      with_items:
+        - /etc/etcd
+        - /var/lib/etcd
+      become: true
+    - name: Check etcd binary existence
+      stat:
+        path: /usr/bin/etcdctl
+      register: etcdctl
+    - name: Install etcd
+      script: files/install_etcd.sh
+      when: not etcdctl.stat.exists
+      become: true
+    - name: Create etcd.conf.yml and etcd.service
+      template:
+        src: 'templates/{{ item.src }}'
+        dest: '{{ item.dest }}'
+        owner: '{{ item.owner }}'
+        group: '{{ item.group }}'
+        mode: '0644'
+      with_items:
+        - {src: 'etcd.conf.yml.j2', dest: '/etc/etcd/etcd.conf.yml', owner: 'etcd', group: 'etcd'}
+        - {src: 'etcd.service.j2', dest: '/usr/lib/systemd/system/etcd.service', owner: 'root', group: 'root'}
+      become: true
+    - name: Reload and restart etcd
+      systemd:
+        name: etcd.service
         state: restarted
         daemon_reload: yes
         enabled: yes
