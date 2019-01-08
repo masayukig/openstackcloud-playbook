@@ -190,6 +190,31 @@
         state: present
       become: true
 
+#########################
+# Memcached
+#########################
+    - name: Install memcached
+      zypper:
+        name: ['memcached','python-python-memcached']
+        state: present
+      become: true
+    - name: Configure memcached
+      template:
+        src: templates/memcached.j2
+        dest: /etc/sysconfig/memcached
+        owner: root
+        group: root
+        mode: "0644"
+        backup: yes
+      become: true
+    - name: restart memcached service
+      systemd:
+        name: memcached.service
+        state: restarted
+        daemon_reload: yes
+        enabled: yes
+      become: true
+
 
 #  handlers:
 #    - name: reboot
