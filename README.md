@@ -1,1 +1,0 @@
-# openstackcloud-playbook
