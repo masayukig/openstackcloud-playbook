@@ -7,6 +7,8 @@ installation guide. https://docs.openstack.org/install-guide
 .. WARNING::
    This project is just for my excercise for OpenStack, ansible, etc.
    So, please do not use this for a production environment :)
+   And, this is just for openSUSE distribution which I use. So that,
+   this doesn't work on CentOS, Ubuntu, Debian, etc.
 
 How to use
 ----------
@@ -24,4 +26,6 @@ How to use
 
 3. Execute like this::
 
-   ansible-playbook -i hosts/inventory.ini --extra-vars="@secret.yml" ./playbooks/controller.yml
+   ansible-playbook -i hosts/inventory.ini \
+     --extra-vars="@secret.yml" \
+     ./playbooks/controller.yml
