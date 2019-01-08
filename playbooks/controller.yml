@@ -13,7 +13,7 @@
         - "{{ keys }}"
     - name: Set hostname
       command: hostname controller
-      become: true
+      become: yes
     - name: Set hostname file
       vars:
         host: "controller"
@@ -23,7 +23,7 @@
         owner: root
         group: root
         mode: "0644"
-      become: true
+      become: yes
     - name: Unset IP address for provider interface
       template:
         src: templates/ifcfg.j2
@@ -31,7 +31,7 @@
         owner: root
         group: root
         mode: "0600"
-      become: true
+      become: yes
       # notify: reboot
     - name: Update hosts
       template:
@@ -40,17 +40,17 @@
         owner: root
         group: root
         mode: "0644"
-      become: true
+      become: yes
     - name: Update all package
       zypper:
         name: '*'
         state: latest
-      become: true
+      become: yes
     - name: Install chrony
       zypper:
         name: chrony
         state: present
-      become: true
+      become: yes
 
     - name: Update chrony setting
       template:
@@ -59,42 +59,42 @@
         owner: root
         group: chrony
         mode: "0640"
-      become: true
+      become: yes
     - name: restart chronyd service
       systemd:
         name: chronyd.service
         state: restarted
         daemon_reload: yes
         enabled: yes
-      become: true
+      become: yes
     - name: Add openstack repo
       zypper_repository:
         name: Rocky
         repo: 'obs://Cloud:OpenStack:Rocky/openSUSE_Leap_15.0'
         state: present
-      become: true
+      become: yes
     - name: Refresh all repos
       zypper_repository:
         repo: '*'
         runrefresh: yes
         auto_import_keys: true
-      become: true
+      become: yes
     - name: Remove conflict packages
       zypper:
         name: patterns-openSUSE-minimal_base-conflicts
         state: absent
-      become: true
+      become: yes
     - name: dist-upgrade
       zypper:
         name: '*'
         state: dist-upgrade
         extra_args: '--no-allow-vendor-change --allow-arch-change'
-      become: true
+      become: yes
     - name: Install opnestack packages
       zypper:
         name: ['python-openstackclient','mariadb','mariadb-client','python-PyMySQL']
         state: present
-      become: true
+      become: yes
     - name: Configure mysql
       template:
         src: templates/openstack.cnf.j2
@@ -102,25 +102,25 @@
         owner: root
         group: root
         mode: "0644"
-      become: true
+      become: yes
       #    - name: stop mysql service
       #      systemd:
       #        name: mysql.service
       #        state: stopped
       #        enabled: yes
-      #      become: true
+      #      become: yes
       #
       #    - name: check if mysql log file size is 0 or not
       #      stat: path=/var/log/mysql/mysqld.log
       #      register: log_file
       #      changed_when: false
-      #      become: true
+      #      become: yes
       #
       #    - name: initialize insecure mysql
       #      command: mysqld --initialize-insecure --user=mysql
       #      changed_when: false
       #      when: log_file.stat.exists == False or log_file.stat.size == 0
-      #      become: true
+      #      become: yes
 
     - name: restart mysql service
       systemd:
@@ -128,7 +128,7 @@
         state: restarted
         daemon_reload: yes
         enabled: yes
-      become: true
+      become: yes
 
     # [FIXME] These are trying to pretend mysql_secure_installation,
     # however, this doesn't work well for now, so,
@@ -159,7 +159,7 @@
       zypper:
         name: rabbitmq-server
         state: present
-      become: true
+      become: yes
     - name: Configure rabbitmq
       template:
         src: templates/rabbitmq-env.conf.j2
@@ -167,14 +167,14 @@
         owner: root
         group: root
         mode: "0644"
-      become: true
+      become: yes
     - name: restart rabbitmq service
       systemd:
         name: rabbitmq-server.service
         state: restarted
         daemon_reload: yes
         enabled: yes
-      become: true
+      become: yes
     - name: add openstack user for rabbitmq
       rabbitmq_user:
         user: openstack
@@ -183,7 +183,7 @@
         read_priv: .*
         write_priv: .*
         state: present
-      become: true
+      become: yes
 
     #########################
     # Memcached
@@ -192,7 +192,7 @@
       zypper:
         name: ['memcached','python-python-memcached']
         state: present
-      become: true
+      become: yes
     - name: Configure memcached
       template:
         src: templates/memcached.j2
@@ -201,21 +201,21 @@
         group: root
         mode: "0644"
         backup: yes
-      become: true
+      become: yes
     - name: restart memcached service
       systemd:
         name: memcached.service
         state: restarted
         daemon_reload: yes
         enabled: yes
-      become: true
+      become: yes
 
     #########################
     # etcd
     #########################
     - name: Add etcd group
       group: name=etcd system=yes
-      become: true
+      become: yes
     - name: Add etcd user
       user:
         name: etcd
@@ -223,7 +223,7 @@
         home: /var/lib/etcd
         shell: /bin/false
         group: etcd
-      become: true
+      become: yes
     - name: Make directories
       file:
         path: '{{ item }}'
@@ -233,7 +233,7 @@
       with_items:
         - /etc/etcd
         - /var/lib/etcd
-      become: true
+      become: yes
     - name: Check etcd binary existence
       stat:
         path: /usr/bin/etcdctl
@@ -241,7 +241,7 @@
     - name: Install etcd
       script: files/install_etcd.sh
       when: not etcdctl.stat.exists
-      become: true
+      become: yes
     - name: Create etcd.conf.yml and etcd.service
       template:
         src: 'templates/{{ item.src }}'
@@ -252,15 +252,105 @@
       with_items:
         - {src: 'etcd.conf.yml.j2', dest: '/etc/etcd/etcd.conf.yml', owner: 'etcd', group: 'etcd'}
         - {src: 'etcd.service.j2', dest: '/usr/lib/systemd/system/etcd.service', owner: 'root', group: 'root'}
-      become: true
+      become: yes
     - name: Reload and restart etcd
       systemd:
         name: etcd.service
         state: restarted
         daemon_reload: yes
         enabled: yes
-      become: true
+      become: yes
 
+    #########################
+    # Keystone
+    #########################
+    - name: Create keystone database
+      mysql_db:
+        name: keystone
+        state: present
+        login_user: root
+        login_password: '{{ mysql_pass }}'
+        login_unix_socket: /var/run/mysql/mysql.sock
+    - name: Grant proper access to the keystone database
+      mysql_user:
+        name: keystone
+        host: '{{ item }}'
+        priv: 'keystone.*:ALL,GRANT'
+        password: '{{ keystone_dbpass }}'
+        state: present
+        login_user: root
+        login_password: '{{ mysql_pass }}'
+        login_unix_socket: /var/run/mysql/mysql.sock
+      with_items:
+        - localhost
+        - '%'
+    - name: Install keystone
+      zypper:
+        name: ['openstack-keystone']
+        state: present
+      become: yes
+    - name: Modify keystone.conf
+      template:
+        src: templates/010-keystone-custom.conf.j2
+        dest: /etc/keystone/keystone.conf.d/010-keystone-custom.conf
+        owner: root
+        group: keystone
+        mode: '0640'
+      become: yes
+    - name: Populate the Identity service database
+      command: keystone-manage db_sync
+    - name: Chown /etc/keystone/credential-keys to keystone for a workaround
+      become: yes
+      file:
+        path: /etc/keystone/credential-keys
+        owner: keystone
+        group: keystone
+        state: directory
+    - name: Initialize Fernet key repositories
+      command: '{{ item }}'
+      become: yes
+      with_items:
+        - keystone-manage fernet_setup --keystone-user keystone --keystone-group keystone
+        - keystone-manage credential_setup --keystone-user keystone --keystone-group keystone
+    - name: Bootstrap the Identity service
+      become: yes
+      command: keystone-manage bootstrap --bootstrap-password '{{ admin_pass }}' --bootstrap-admin-url http://controller:5000/v3/ --bootstrap-internal-url http://controller:5000/v3/ --bootstrap-public-url http://controller:5000/v3/ --bootstrap-region-id RegionOne
+    - name: Install apache2
+      zypper:
+        name: ['apache2', 'apache2-mod_wsgi']
+        state: present
+      become: yes
+    - name: Configure the Apache HTTP server
+      template:
+        src: 'templates/{{ item.src }}'
+        dest: '{{ item.dest }}'
+        owner: root
+        group: root
+        mode: '0644'
+      with_items:
+        - { src: 'apache2.j2', dest: '/etc/sysconfig/apache2' }
+        - { src: 'wsgi-keystone.conf.j2', dest: '/etc/apache2/conf.d/wsgi-keystone.conf' }
+      become: yes
+    - name: Recursively change the ownership of the /etc/keystone directory
+      file:
+        path: /etc/keystone
+        owner: keystone
+        group: keystone
+        recurse: yes
+      become: yes
+    - name: Start the Apache HTTP service and configure it to start when the system boots
+      systemd:
+        name: apache2.service
+        state: restarted
+        daemon_reload: yes
+        enabled: yes
+      become: yes
+    - name: put admin-openrc
+      template:
+        src: templates/admin-openrc.j2
+        dest: '{{ ansible_env.HOME }}/admin-openrc'
+    - name: Create a domain, projects, users, and roles
+      script: files/create_keystone_resources.sh
 
 #  handlers:
 #    - name: reboot
