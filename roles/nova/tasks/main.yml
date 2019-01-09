@@ -1,0 +1,91 @@
+#########################
+# Nova
+#########################
+- name: Create nova database
+  mysql_db:
+    name: '{{ item }}'
+    state: present
+    login_user: root
+    login_password: '{{ mysql_pass }}'
+    login_unix_socket: /var/run/mysql/mysql.sock
+  with_items:
+    - nova_api
+    - nova
+    - nova_cell0
+    - placement
+- name: Grant proper access to the nova database
+  mysql_user:
+    name: '{{ item.user }}'
+    host: '{{ item.host }}'
+    priv: '{{ item.db }}.*:ALL,GRANT'
+    append_privs: yes
+    password: '{{ item.dbpass }}'
+    state: present
+    login_user: root
+    login_password: '{{ mysql_pass }}'
+    login_unix_socket: /var/run/mysql/mysql.sock
+  loop:
+    - {host: 'localhost', db: 'nova_api', user: 'nova', dbpass: '{{ nova_dbpass }}'}
+    - {host: '%', db: 'nova_api', user: 'nova', dbpass: '{{ nova_dbpass }}'}
+    - {host: 'localhost', db: 'nova', user: 'nova', dbpass:  '{{ nova_dbpass }}'}
+    - {host: '%', db: 'nova', user: 'nova', dbpass: '{{ nova_dbpass }}'}
+    - {host: 'localhost', db: 'nova_cell0', user: 'nova', dbpass: '{{ nova_dbpass }}'}
+    - {host: '%', db: 'nova_cell0', user: 'nova', dbpass: '{{ nova_dbpass }}'}
+    - {host: 'localhost', db: 'placement', user: 'placement', dbpass: '{{ placement_dbpass }}'}
+    - {host: '%', db: 'placement', user: 'placement', dbpass: '{{ placement_dbpass }}'}
+- name: Create nova/placement resources
+  script: create_nova_resources.sh
+- name: Install nova packages
+  zypper:
+    name: ['openstack-nova-api',
+            'openstack-nova-scheduler',
+            'openstack-nova-conductor',
+            'openstack-nova-novncproxy',
+            'openstack-nova-placement-api',
+            'iptables']
+    state: present
+  become: yes
+- name: put nova conf files
+  become: yes
+  template:
+    src: 010-nova-custom.conf.j2
+    dest: /etc/nova/nova.conf.d/010-nova-custom.conf
+    owner: root
+    group: nova
+    mode: "0644"
+- name: Populate the nova-api and placement databases
+  become: yes
+  script: su_shell_command.sh "nova-manage api_db sync" nova
+- name: Register the cell0 database
+  become: yes
+  script: su_shell_command.sh "nova-manage cell_v2 map_cell0" nova
+- name: Check cell registration
+  become: yes
+  script: su_shell_command.sh "nova-manage cell_v2 list_cells" nova
+  register: cell_result
+- name: Create the cell1 cell
+  become: yes
+  script: su_shell_command.sh "nova-manage cell_v2 create_cell --name=cell1 --verbose" nova
+  when: cell_result.stdout is not search('cell1')
+- name: Populate the nova database
+  become: yes
+  script: su_shell_command.sh "nova-manage db sync" nova
+- name: Verify nova cell0 and cell1 are registered correctly
+  become: yes
+  script: su_shell_command.sh "nova-manage cell_v2 list_cells" nova
+- name: Enable the placement API Apache vhost (copy the config)
+  become: yes
+  command: cp -f /etc/apache2/vhosts.d/nova-placement-api.conf.sample /etc/apache2/vhosts.d/nova-placement-api.conf
+- name: Start the compute services and configure them to start when the system boots
+  systemd:
+    name: '{{ item }}'
+    state: restarted
+    daemon_reload: yes
+    enabled: yes
+  become: yes
+  loop:
+    - apache2.service
+    - openstack-nova-api.service
+    - openstack-nova-scheduler.service
+    - openstack-nova-conductor.service
+    - openstack-nova-novncproxy.service

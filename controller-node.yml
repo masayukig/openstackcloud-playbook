@@ -1,0 +1,32 @@
+---
+- name: Controller node setup
+  hosts: controller
+  roles:
+    - role: security
+      tags: security
+    - role: host-networking
+      tags: host-networking
+    - role: ntp
+      tags: ntp
+    - role: os-packages
+      tags: os-packages
+    - role: database
+      tags: database
+    - role: mq
+      tags: mq
+    - role: memcached
+      tags: memcached
+    - role: etcd
+      tags: etcd
+    - role: keystone
+      tags: keystone
+    - role: glance
+      tags: glance
+    - role: nova
+      tags: nova
+    - role: neutron
+      tags: neutron
+    - role: cinder
+      tags: cinder
+    - role: horizon
+      tags: horizon

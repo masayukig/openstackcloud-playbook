@@ -1,0 +1,36 @@
+- name: Add openstack repo
+  zypper_repository:
+    name: Rocky
+    repo: 'obs://Cloud:OpenStack:Rocky/openSUSE_Leap_15.0'
+    state: present
+  become: yes
+- name: Refresh all repos
+  zypper_repository:
+    repo: '*'
+    runrefresh: yes
+    auto_import_keys: true
+  become: yes
+- name: Remove conflict packages
+  zypper:
+    name: patterns-openSUSE-minimal_base-conflicts
+    state: absent
+  become: yes
+- name: dist-upgrade
+  zypper:
+    name: '*'
+    state: dist-upgrade
+    extra_args: '--no-allow-vendor-change --allow-arch-change'
+  become: yes
+- name: Install opnestack packages
+  zypper:
+    name: ['python-openstackclient','mariadb','mariadb-client','python-PyMySQL']
+    state: present
+  become: yes
+- name: Configure mysql
+  template:
+    src: openstack.cnf.j2
+    dest: /etc/my.cnf.d/openstack.cnf
+    owner: root
+    group: root
+    mode: "0644"
+  become: yes

@@ -1,0 +1,53 @@
+#########################
+# Glance
+#########################
+- name: Create glance database
+  mysql_db:
+    name: glance
+    state: present
+    login_user: root
+    login_password: '{{ mysql_pass }}'
+    login_unix_socket: /var/run/mysql/mysql.sock
+- name: Grant proper access to the glance database
+  mysql_user:
+    name: glance
+    host: '{{ item }}'
+    priv: 'glance.*:ALL,GRANT'
+    password: '{{ glance_dbpass }}'
+    state: present
+    login_user: root
+    login_password: '{{ mysql_pass }}'
+    login_unix_socket: /var/run/mysql/mysql.sock
+  with_items:
+    - localhost
+    - '%'
+- name: create the service credentials, endpoints
+  script: create_glance_resources.sh
+- name: Install glance packages
+  zypper:
+    name: ['openstack-glance','openstack-glance-api','openstack-glance-registry']
+    state: present
+  become: yes
+- name: put glance conf files
+  become: yes
+  template:
+    src: '{{ item.src }}'
+    dest: '/etc/glance/{{ item.dest }}'
+    owner: root
+    group: glance
+    mode: "0644"
+  with_items:
+    - {src: '010-glance-api-custom.conf.j2', dest: 'glance-api.conf.d/010-glance-api-custom.conf'}
+    - {src: '010-glance-registry-custom.conf.j2', dest: 'glance-registry.conf.d/010-glance-registry-custom.conf'}
+- name: Start the Image services and configure them to start when the system boots
+  systemd:
+    name: '{{ item }}'
+    state: restarted
+    daemon_reload: yes
+    enabled: yes
+  become: yes
+  with_items:
+    - openstack-glance-api.service
+    - openstack-glance-registry.service
+- name: Verify Glance operation
+  script: verify-glance.sh

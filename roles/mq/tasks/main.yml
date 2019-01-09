@@ -1,0 +1,29 @@
+- name: Install rabbitmq
+  zypper:
+    name: rabbitmq-server
+    state: present
+  become: yes
+- name: Configure rabbitmq
+  template:
+    src: rabbitmq-env.conf.j2
+    dest: /etc/rabbitmq/rabbitmq-env.conf
+    owner: root
+    group: root
+    mode: "0644"
+  become: yes
+- name: restart rabbitmq service
+  systemd:
+    name: rabbitmq-server.service
+    state: restarted
+    daemon_reload: yes
+    enabled: yes
+  become: yes
+- name: add openstack user for rabbitmq
+  rabbitmq_user:
+    user: openstack
+    password: "{{ rabbit_pass }}"
+    configure_priv: .*
+    read_priv: .*
+    write_priv: .*
+    state: present
+  become: yes

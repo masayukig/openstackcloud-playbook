@@ -28,4 +28,4 @@ How to use
 
    ansible-playbook -i hosts/inventory.ini \
      --extra-vars="@secret.yml" \
-     ./playbooks/controller.yml
+     controller-node.yml

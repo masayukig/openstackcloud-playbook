@@ -1,0 +1,90 @@
+#########################
+# Keystone
+#########################
+- name: Create keystone database
+  mysql_db:
+    name: keystone
+    state: present
+    login_user: root
+    login_password: '{{ mysql_pass }}'
+    login_unix_socket: /var/run/mysql/mysql.sock
+- name: Grant proper access to the keystone database
+  mysql_user:
+    name: keystone
+    host: '{{ item }}'
+    priv: 'keystone.*:ALL,GRANT'
+    password: '{{ keystone_dbpass }}'
+    state: present
+    login_user: root
+    login_password: '{{ mysql_pass }}'
+    login_unix_socket: /var/run/mysql/mysql.sock
+  with_items:
+    - localhost
+    - '%'
+- name: Install keystone
+  zypper:
+    name: ['openstack-keystone']
+    state: present
+  become: yes
+- name: Modify keystone.conf
+  template:
+    src: 010-keystone-custom.conf.j2
+    dest: /etc/keystone/keystone.conf.d/010-keystone-custom.conf
+    owner: root
+    group: keystone
+    mode: '0640'
+  become: yes
+- name: Populate the Identity service database
+  command: keystone-manage db_sync
+- name: Chown /etc/keystone/credential-keys to keystone for a workaround
+  become: yes
+  file:
+    path: /etc/keystone/credential-keys
+    owner: keystone
+    group: keystone
+    state: directory
+- name: Initialize Fernet key repositories
+  command: '{{ item }}'
+  become: yes
+  with_items:
+    - keystone-manage fernet_setup --keystone-user keystone --keystone-group keystone
+    - keystone-manage credential_setup --keystone-user keystone --keystone-group keystone
+- name: Bootstrap the Identity service
+  become: yes
+  command: keystone-manage bootstrap --bootstrap-password '{{ admin_pass }}' --bootstrap-admin-url http://controller:5000/v3/ --bootstrap-internal-url http://controller:5000/v3/ --bootstrap-public-url http://controller:5000/v3/ --bootstrap-region-id RegionOne
+- name: Install apache2
+  zypper:
+    name: ['apache2','apache2-mod_wsgi']
+    state: present
+  become: yes
+- name: Configure the Apache HTTP server
+  template:
+    src: '{{ item.src }}'
+    dest: '{{ item.dest }}'
+    owner: root
+    group: root
+    mode: '0644'
+  with_items:
+    - { src: 'apache2.j2', dest: '/etc/sysconfig/apache2' }
+    - { src: 'wsgi-keystone.conf.j2', dest: '/etc/apache2/conf.d/wsgi-keystone.conf' }
+  become: yes
+- name: Recursively change the ownership of the /etc/keystone directory
+  file:
+    path: /etc/keystone
+    owner: keystone
+    group: keystone
+    recurse: yes
+  become: yes
+- name: Start the Apache HTTP service and configure it to start when the system boots
+  systemd:
+    name: apache2.service
+    state: restarted
+    daemon_reload: yes
+    enabled: yes
+  become: yes
+- name: put admin-openrc
+  template:
+    src: admin-openrc.j2
+    dest: '{{ ansible_env.HOME }}/admin-openrc'
+- name: Create a domain, projects, users, and roles
+  script: create_keystone_resources.sh

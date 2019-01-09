@@ -1,0 +1,30 @@
+- name: Set hostname
+  command: hostname controller
+  become: yes
+- name: Set hostname file
+  vars:
+    host: "controller"
+  template:
+    src: templates/hostname.j2
+    dest: /etc/hostname
+    owner: root
+    group: root
+    mode: "0644"
+  become: yes
+- name: Unset IP address for provider interface
+  template:
+    src: templates/ifcfg.j2
+    dest: /etc/sysconfig/network/ifcfg-eth0
+    owner: root
+    group: root
+    mode: "0600"
+  become: yes
+  # notify: reboot
+- name: Update hosts
+  template:
+    src: templates/hosts.j2
+    dest: /etc/hosts
+    owner: root
+    group: root
+    mode: "0644"
+  become: yes

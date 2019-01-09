@@ -1,0 +1,22 @@
+- name: Install chrony
+  zypper:
+    name: chrony
+    state: present
+  become: yes
+
+- name: Update chrony setting
+  template:
+    src: chrony.conf.j2
+    dest: /etc/chrony.conf
+    owner: root
+    group: chrony
+    mode: "0640"
+  become: yes
+
+- name: restart chronyd service
+  systemd:
+    name: chronyd.service
+    state: restarted
+    daemon_reload: yes
+    enabled: yes
+  become: yes
