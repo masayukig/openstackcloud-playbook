@@ -1,0 +1,14 @@
+---
+- name: Storage node setup
+  hosts: storage
+  roles:
+    - role: security
+      tags: security
+    - role: ntp
+      tags: ntp
+    - role: os-repo
+      tags: os-repo
+    - role: cinder-storage
+      tags: cinder-storage
+    - role: prom-node-exporter
+      tags: prom-node-exporter

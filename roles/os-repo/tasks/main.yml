@@ -1,0 +1,23 @@
+- name: Add openstack repo
+  zypper_repository:
+    name: Rocky
+    repo: 'obs://Cloud:OpenStack:Rocky/openSUSE_Leap_15.0'
+    state: present
+  become: yes
+- name: Refresh all repos
+  zypper_repository:
+    repo: '*'
+    runrefresh: yes
+    auto_import_keys: true
+  become: yes
+- name: Remove conflict packages
+  zypper:
+    name: patterns-openSUSE-minimal_base-conflicts
+    state: absent
+  become: yes
+- name: dist-upgrade
+  zypper:
+    name: '*'
+    state: dist-upgrade
+    extra_args: '--no-allow-vendor-change --allow-arch-change'
+  become: yes

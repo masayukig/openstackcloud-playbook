@@ -1,0 +1,28 @@
+#########################
+# Cinder Storage node
+#########################
+- name: Install the cinder storage related components
+  zypper:
+    name: ['lvm2','qemu','openstack-cinder-volume','tgt']
+    state: present
+  become: yes
+- name: Put cinder configs
+  become: yes
+  template:
+    src: '{{ item.src }}'
+    dest: '{{ item.dest }}'
+  loop:
+    - {src: '010-cinder-custom.conf.j2', dest: '/etc/cinder/cinder.conf.d/010-cinder-custom.conf'}
+    - {src: 'tgt-cinder.conf.j2', dest: '/etc/tgt/conf.d/cinder.conf'}
+
+- name: Restart openstack services
+  become: yes
+  systemd:
+    name: '{{ item }}'
+    state: restarted
+    daemon_reload: yes
+    enabled: yes
+  loop:
+    - openstack-cinder-volume.service
+    - tgtd.service
+

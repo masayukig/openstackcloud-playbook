@@ -1,0 +1,60 @@
+[DEFAULT]
+transport_url = rabbit://openstack:{{ rabbit_pass }}@controller
+
+my_ip = {{ my_ip }}
+
+enabled_backends = nfs
+nas_volume_prov_type = thin
+
+[database]
+connection = mysql+pymysql://cinder:{{ cinder_dbpass }}@controller/cinder
+
+auth_strategy = keystone
+
+[keystone_authtoken]
+auth_uri = http://controller:5000
+auth_url = http://controller:5000
+memcached_servers = controller:11211
+auth_type = password
+project_domain_id = default
+user_domain_id = default
+project_name = service
+username = cinder
+password = {{ cinder_pass }}
+
+[oslo_concurrency]
+lock_path = /var/lib/cinder/tmp
+
+[backend_defaults]
+volume_driver=cinder.volume.drivers.nfs.NfsDriver
+
+nas_host = {{ my_ip }}
+nas_share_path = /tank/cinder
+
+# File with the list of available NFS shares. (string value)
+#nfs_shares_config = /etc/cinder/nfs_shares
+
+# Create volumes as sparsed files which take no space. If set to False volume
+# is created as regular file. In such case volume creation takes a lot of time.
+# (boolean value)
+#nfs_sparsed_volumes = true
+
+# Create volumes as QCOW2 files rather than raw files. (boolean value)
+#nfs_qcow2_volumes = false
+nfs_qcow2_volumes = true
+
+# Base dir containing mount points for NFS shares. (string value)
+#nfs_mount_point_base = $state_path/mnt
+
+# Mount options passed to the NFS client. See section of the NFS man page for
+# details. (string value)
+#nfs_mount_options = <None>
+
+# The number of attempts to mount NFS shares before raising an error.  At least
+# one attempt will be made to mount an NFS share, regardless of the value
+# specified. (integer value)
+#nfs_mount_attempts = 3
+
+# Enable support for snapshots on the NFS driver. Platforms using libvirt
+# <1.2.7 will encounter issues with this feature. (boolean value)
+#nfs_snapshot_support = false

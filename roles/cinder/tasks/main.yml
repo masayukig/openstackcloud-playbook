@@ -1,2 +1,90 @@
-- name: WIP FIXME
-  command: echo "WIP FIXME"
+#########################
+# Cinder
+#########################
+- name: Create Cinder database
+  mysql_db:
+    name: '{{ item }}'
+    state: present
+    login_user: root
+    login_password: '{{ mysql_pass }}'
+    login_unix_socket: /var/run/mysql/mysql.sock
+  loop:
+    - cinder
+- name: Grant proper access to the cinder database
+  mysql_user:
+    name: '{{ item.user }}'
+    host: '{{ item.host }}'
+    priv: '{{ item.db }}.*:ALL,GRANT'
+    append_privs: yes
+    password: '{{ item.dbpass }}'
+    state: present
+    login_user: root
+    login_password: '{{ mysql_pass }}'
+    login_unix_socket: /var/run/mysql/mysql.sock
+  loop:
+    - {host: 'localhost', db: 'cinder', user: 'cinder', dbpass: '{{ cinder_dbpass }}'}
+    - {host: '%', db: 'cinder', user: 'cinder', dbpass: '{{ cinder_dbpass }}'}
+- name: Create the cinder user
+  os_user:
+    cloud: admin
+    state: present
+    name: cinder
+    password: '{{ cinder_pass }}'
+    domain: default
+- name: Add the admin role to the cinder user
+  os_user_role:
+    cloud: admin
+    user: cinder
+    role: admin
+    project: service
+- name: Create the cinder service entity
+  os_keystone_service:
+    cloud: admin
+    state: present
+    name: '{{ item.name }}'
+    service_type: '{{ item.type }}'
+    description: OpenStack OpenStack Block Storage
+  loop:
+    - {name: 'cinderv2', type: 'volumev2'}
+    - {name: 'cinderv3', type: 'volumev3'}
+- name: Create the Block Storage service API endpoints
+  os_keystone_endpoint:
+    cloud: admin
+    service: '{{ item.service }}'
+    region: RegionOne
+    endpoint_interface: '{{ item.endpoint_interface }}'
+    url: 'http://controller:8776/{{ item.version }}/%(project_id)s'
+  loop:
+    - {service: 'cinderv2', endpoint_interface: 'public', version: 'v2'}
+    - {service: 'cinderv2', endpoint_interface: 'internal', version: 'v2'}
+    - {service: 'cinderv2', endpoint_interface: 'admin', version: 'v2'}
+    - {service: 'cinderv3', endpoint_interface: 'public', version: 'v3'}
+    - {service: 'cinderv3', endpoint_interface: 'internal', version: 'v3'}
+    - {service: 'cinderv3', endpoint_interface: 'admin', version: 'v3'}
+- name: Install the cinder components
+  zypper:
+    name: ['openstack-cinder-api',
+           'openstack-cinder-scheduler',
+          ]
+    state: present
+  become: yes
+- name: Put cinder configs
+  become: yes
+  template:
+    src: '{{ item.src }}'
+    dest: '/etc/cinder/{{ item.dest }}'
+  loop:
+    - {src: '010-cinder-custom.conf.j2', dest: 'cinder.conf.d/010-cinder-custom.conf'}
+
+- name: Restart openstack services
+  become: yes
+  systemd:
+    name: '{{ item }}'
+    state: restarted
+    daemon_reload: yes
+    enabled: yes
+  loop:
+    - openstack-nova-api.service
+    - openstack-cinder-api.service
+    - openstack-cinder-scheduler.service
+
