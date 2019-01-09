@@ -1,0 +1,64 @@
+[DEFAULT]
+enabled_apis = osapi_compute,metadata
+transport_url = rabbit://openstack:{{ rabbit_pass }}@controller
+my_ip = 192.168.2.101
+
+use_neutron = true
+firewall_driver = nova.virt.firewall.NoopFirewallDriver
+
+[api_database]
+connection = mysql+pymysql://nova:{{ nova_dbpass }}@controller/nova_api
+
+[database]
+connection = mysql+pymysql://nova:{{ nova_dbpass }}@controller/nova
+
+[placement_database]
+connection = mysql+pymysql://placement:{{ placement_dbpass }}@controller/placement
+
+[api]
+auth_strategy = keystone
+
+[vnc]
+enabled = true
+server_listen = $my_ip
+server_proxyclient_address = $my_ip
+
+[glance]
+api_servers = http://controller:9292
+
+[oslo_concurrency]
+lock_path = /var/run/nova
+
+[placement]
+region_name = RegionOne
+project_domain_name = Default
+project_name = service
+auth_type = password
+user_domain_name = Default
+auth_url = http://controller:5000/v3
+username = placement
+password = {{ placement_pass }}
+
+[keystone_authtoken]
+auth_url = http://controller:5000/v3
+memcached_servers = controller:11211
+auth_type = password
+project_domain_name = default
+user_domain_name = default
+project_name = service
+username = nova
+password = {{ nova_pass }}
+
+[neutron]
+url = http://controller:9696
+auth_url = http://controller:5000
+auth_type = password
+project_domain_name = default
+user_domain_name = default
+region_name = RegionOne
+project_name = service
+username = neutron
+password = {{ neutron_pass }}
+service_metadata_proxy = true
+metadata_proxy_shared_secret = {{ metadata_secret }}
+
