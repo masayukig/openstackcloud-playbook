@@ -1,0 +1,3 @@
+- name: Discover compute hosts
+  become: yes
+  script: su_shell_command.sh "nova-manage cell_v2 discover_hosts --verbose" nova

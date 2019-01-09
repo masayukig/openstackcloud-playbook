@@ -17,6 +17,13 @@
   #      when: log_file.stat.exists == False or log_file.stat.size == 0
   #      become: yes
 
+- name: Update firewalld setting
+  become: yes
+  command: firewall-cmd --add-service=mysql --permanent
+- name: Reload firewalld setting
+  become: yes
+  command: firewall-cmd --reload
+
 - name: restart mysql service
   systemd:
     name: mysql.service

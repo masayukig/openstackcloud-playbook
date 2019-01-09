@@ -86,5 +86,15 @@
   template:
     src: admin-openrc.j2
     dest: '{{ ansible_env.HOME }}/admin-openrc'
+- name: Prepare .config/openstack direcotry
+  file:
+    path: '{{ ansible_env.HOME }}/.config/openstack'
+    state: directory
+- name: Put cloud.yaml
+  template:
+    src: '{{ item }}.j2'
+    dest: '{{ ansible_env.HOME }}/.config/openstack/{{ item }}'
+  loop:
+    - clouds.yaml
 - name: Create a domain, projects, users, and roles
   script: create_keystone_resources.sh

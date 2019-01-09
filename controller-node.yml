@@ -8,6 +8,8 @@
       tags: host-networking
     - role: ntp
       tags: ntp
+    - role: os-repo
+      tags: os-repo
     - role: os-packages
       tags: os-packages
     - role: database
@@ -30,3 +32,7 @@
       tags: cinder
     - role: horizon
       tags: horizon
+    - role: prom-node-exporter
+      tags: prom-node-exporter
+    - role: discover-compute-hosts
+      tags: discover-compute-hosts

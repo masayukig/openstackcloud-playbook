@@ -1,0 +1,21 @@
+---
+- name: Install docker
+  zypper:
+    name: ['docker','python3-docker','python2-docker']
+    state: present
+  become: yes
+- name: Start docker
+  systemd:
+    name: docker
+    state: restarted
+    daemon_reload: yes
+    enabled: yes
+  become: yes
+- name: Run prometheus/node_exporter
+  docker_container:
+    name: node_exporter
+    ports:
+      - '9100:9100'
+    restart_policy: always
+    image: prom/node-exporter
+  become: yes

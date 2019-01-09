@@ -14,3 +14,10 @@
     name: '*'
     state: latest
   become: yes
+- name: Stop and disable firewalld
+  systemd:
+    name: firewalld
+    state: stopped
+    daemon_reload: yes
+    enabled: no
+  become: yes
