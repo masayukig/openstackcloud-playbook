@@ -13,6 +13,13 @@
     mode: "0640"
   become: yes
 
+- name: Update firewalld setting
+  become: yes
+  command: firewall-cmd --add-service=ntp --permanent
+- name: Reload firewalld setting
+  become: yes
+  command: firewall-cmd --reload
+
 - name: restart chronyd service
   systemd:
     name: chronyd.service
