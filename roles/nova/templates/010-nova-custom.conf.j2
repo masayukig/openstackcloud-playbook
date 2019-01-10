@@ -1,7 +1,7 @@
 [DEFAULT]
 enabled_apis = osapi_compute,metadata
 transport_url = rabbit://openstack:{{ rabbit_pass }}@controller
-my_ip = 192.168.2.101
+my_ip = {{ ansible_default_ipv4.address }}
 
 use_neutron = true
 firewall_driver = nova.virt.firewall.NoopFirewallDriver
@@ -17,6 +17,9 @@ connection = mysql+pymysql://placement:{{ placement_dbpass }}@controller/placeme
 
 [api]
 auth_strategy = keystone
+
+[scheduler]
+discover_hosts_in_cells_interval = 300
 
 [vnc]
 enabled = true
