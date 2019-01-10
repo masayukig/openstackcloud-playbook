@@ -1,0 +1,22 @@
+- name: Create the provider network
+  os_network:
+    cloud: admin
+    state: present
+    name: provider
+    shared: yes
+    external: yes
+    provider_physical_network: provider
+    provider_network_type: flat
+
+- name: Create a subnet on the network
+  os_subnet:
+    cloud: admin
+    state: present
+    network_name: provider
+    name: provider
+    cidr: 10.0.0.0/24
+    dns_nameservers:
+      - 1.1.1.1
+      - 8.8.8.8
+      - 8.8.4.4
+    gateway_ip: 10.0.0.1

@@ -36,3 +36,5 @@
       tags: prom-node-exporter
     - role: discover-compute-hosts
       tags: discover-compute-hosts
+    - role: initial-network
+      tags: initial-network
