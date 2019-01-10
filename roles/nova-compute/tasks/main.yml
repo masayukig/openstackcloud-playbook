@@ -3,13 +3,13 @@
 #########################
 
 - name: Install nova packages
+  become: yes
   zypper:
     name: ['openstack-nova-compute',
            'genisoimage',
            'qemu-kvm',
-           ' libvirt']
+           'libvirt']
     state: present
-  become: yes
 - name: put nova conf files
   become: yes
   template:

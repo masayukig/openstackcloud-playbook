@@ -2,8 +2,6 @@
   command: hostname controller
   become: yes
 - name: Set hostname file
-  vars:
-    host: "controller"
   template:
     src: templates/hostname.j2
     dest: /etc/hostname

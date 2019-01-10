@@ -1,0 +1,16 @@
+---
+- name: Compute node setup
+  hosts: compute
+  roles:
+    - role: security
+      tags: security
+    - role: host-networking
+      tags: host-networking
+    # - role: ntp
+    #   tags: ntp
+    - role: os-repo
+      tags: os-repo
+    - role: nova-compute
+      tags: nova-compute
+    - role: prom-node-exporter
+      tags: prom-node-exporter
