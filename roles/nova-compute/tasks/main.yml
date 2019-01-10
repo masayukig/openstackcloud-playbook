@@ -1,0 +1,44 @@
+#########################
+# Nova compute
+#########################
+
+- name: Install nova packages
+  zypper:
+    name: ['openstack-nova-compute',
+           'genisoimage',
+           'qemu-kvm',
+           ' libvirt']
+    state: present
+  become: yes
+- name: put nova conf files
+  become: yes
+  template:
+    src: '{{ item.src }}'
+    dest: '{{ item.dest }}'
+    owner: root
+    group: nova
+    mode: "0644"
+  loop:
+    - {src: '010-nova-custom.conf.j2', dest: '/etc/nova/nova.conf.d/010-nova-custom.conf'}
+    - {src: 'libvirtd.conf.j2', dest: '/etc/libvirt/libvirtd.conf'}
+    - {src: 'nbd.conf.j2', dest: '/etc/modules-load.d/nbd.conf'}
+- name: Load nbd kernel module
+  become: yes
+  command: modprobe nbd
+- name: Start the Compute service including its dependencies and configure them to start automatically when the system boots
+  systemd:
+    name: '{{ item }}'
+    state: restarted
+    daemon_reload: yes
+    enabled: yes
+  become: yes
+  loop:
+    - libvirtd.service
+    - openstack-nova-compute.service
+
+## NOTE
+# To add the compute node to the cell database immediate, we need to execute a command.
+# su -s /bin/sh -c "nova-manage cell_v2 discover_hosts --verbose" nova
+# or add a config to nova.conf on controller node
+# [scheduler]
+# discover_hosts_in_cells_interval = 300
