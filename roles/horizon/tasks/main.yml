@@ -1,2 +1,33 @@
-- name: WIP FIXME
-  command: echo "WIP FIXME"
+#########################
+# Horizon dashboard
+#########################
+- name: Install the packages
+  zypper:
+    name: ['openstack-dashboard']
+    state: present
+  become: yes
+- name: Configure the web server
+  become: yes
+  command: '{{ item }}'
+  loop:
+   - cp /etc/apache2/conf.d/openstack-dashboard.conf.sample /etc/apache2/conf.d/openstack-dashboard.conf
+   - a2enmod rewrite
+
+- name: Put horizon configs
+  become: yes
+  template:
+    src: '{{ item.src }}'
+    dest: '{{ item.dest }}'
+  loop:
+    - {src: 'local_settings.py.j2', dest: '/srv/www/openstack-dashboard/openstack_dashboard/local/local_settings.py'}
+
+- name: Restart openstack services
+  become: yes
+  systemd:
+    name: '{{ item }}'
+    state: restarted
+    daemon_reload: yes
+    enabled: yes
+  loop:
+    - apache2.service
+    - memcached.service
