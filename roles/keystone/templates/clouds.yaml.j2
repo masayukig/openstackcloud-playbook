@@ -9,3 +9,15 @@ clouds:
       project_domain_name: Default
       project_name: admin
       auth_url: http://controller:5000/v3
+
+  demo:
+    identity_api_version: 3
+    image_api_version: 2
+    auth:
+      username: myuser
+      password: {{ myuser_pass }}
+      user_domain_name: Default
+      project_domain_name: Default
+      project_name: myproject
+      auth_url: http://controller:5000/v3
+

@@ -8,7 +8,7 @@
     provider_physical_network: provider
     provider_network_type: flat
 
-- name: Create a subnet on the network
+- name: Create a subnet on the provider network
   os_subnet:
     cloud: admin
     state: present
@@ -20,3 +20,31 @@
       - 8.8.8.8
       - 8.8.4.4
     gateway_ip: 10.0.0.1
+
+- name: Create the self-service network
+  os_network:
+    cloud: demo
+    state: present
+    name: selfservice
+
+- name: Create the subnet on the self-service network
+  os_subnet:
+    cloud: demo
+    state: present
+    network_name: selfservice
+    name: selfservice
+    cidr: 172.16.1.0/24
+    dns_nameservers:
+      - 1.1.1.1
+      - 8.8.8.8
+      - 8.8.4.4
+    gateway_ip: 172.16.1.1
+
+- name: Create the router
+  os_router:
+    cloud: demo
+    state: present
+    name: router
+    network: provider
+    interfaces:
+      - selfservice
