@@ -17,12 +17,12 @@
   #      when: log_file.stat.exists == False or log_file.stat.size == 0
   #      become: yes
 
-- name: Update firewalld setting
-  become: yes
-  command: firewall-cmd --add-service=mysql --permanent
-- name: Reload firewalld setting
-  become: yes
-  command: firewall-cmd --reload
+  #- name: Update firewalld setting
+  #  become: yes
+  #  command: firewall-cmd --add-service=mysql --permanent
+  #- name: Reload firewalld setting
+  #  become: yes
+  #  command: firewall-cmd --reload
 
 - name: restart mysql service
   systemd:
@@ -31,6 +31,66 @@
     daemon_reload: yes
     enabled: yes
   become: yes
+
+# [FIXME] These are trying to pretend mysql_secure_installation,
+# however, this might not work well for now. If so,
+# do `mysql_secure_installation` on the controller node as a workaround.
+# And then, run the following playbook again.
+- name: Set the root password
+  mysql_user:
+    login_user: root
+    # This password is for the first attempt
+    # login_password: ''
+    login_password: '{{ mysql_pass }}'
+    user: root
+    password: '{{ mysql_pass }}'
+    login_unix_socket: /var/run/mysql/mysql.sock
+- name: Secure the root user for IPV6 localhost (::1)
+  mysql_user:
+    login_user: root
+    login_password: '{{ mysql_pass }}'
+    user: root
+    password: '{{ mysql_pass }}'
+    login_unix_socket: /var/run/mysql/mysql.sock
+    host: ::1
+- name: Secure the root user for IPV4 localhost (127.0.0.1)
+  mysql_user:
+    login_user: root
+    login_password: '{{ mysql_pass }}'
+    user: root
+    password: '{{ mysql_pass }}'
+    login_unix_socket: /var/run/mysql/mysql.sock
+    host: 127.0.0.1
+
+- name: Secure the root user for localhost domain
+  mysql_user:
+    login_user: root
+    login_password: '{{ mysql_pass }}'
+    user: root
+    password: '{{ mysql_pass }}'
+    login_unix_socket: /var/run/mysql/mysql.sock
+    host: localhost
+
+- name: Secure the root user for server_hostname domain
+  mysql_user:
+    login_user: root
+    login_password: '{{ mysql_pass }}'
+    user: root
+    password: '{{ mysql_pass }}'
+    login_unix_socket: /var/run/mysql/mysql.sock
+    host: "{{ ansible_fqdn }}"
+
+- name: Deletes anonymous server user
+  mysql_user:
+    login_user: root
+    login_password: '{{ mysql_pass }}'
+    user: root
+    password: '{{ mysql_pass }}'
+    login_unix_socket: /var/run/mysql/mysql.sock
+    user: ""
+    host_all: yes
+    state: absent
+
 
 # [FIXME] These are trying to pretend mysql_secure_installation,
 # however, this doesn't work well for now, so,

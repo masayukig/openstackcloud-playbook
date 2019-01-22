@@ -26,6 +26,8 @@ How to use
 
 3. Execute like this::
 
-   ansible-playbook -i hosts/inventory.ini \
+   ansible-playbook -l controller
+     -i hosts/inventory.ini \
      --extra-vars="@secret.yml" \
-     controller-node.yml
+     --ask-vault-pass \
+     controller-node.yml -K -k

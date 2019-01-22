@@ -104,12 +104,12 @@
 - name: Disable apparmor dnsmasq and haproxy
   become: yes
   file:
-    src: '/etc/apparmor.d/usr.sbin.{{ item }}'
+    src: '/etc/apparmor.d/{{ item }}'
     dest: '/etc/apparmor.d/disable/{{ item }}'
     state: link
   loop:
-    - dnsmasq
-    - haproxy
+    - usr.sbin.dnsmasq
+    - usr.sbin.haproxy
 - name: Restart apparmor
   become: yes
   systemd:
@@ -117,6 +117,9 @@
     state: restarted
     daemon_reload: yes
     enabled: yes
+- name: DB migrate
+  become: yes
+  command: /usr/bin/neutron-db-manage --config-file /etc/neutron/neutron.conf --config-file /etc/neutron/plugin.ini upgrade head
 - name: Restart openstack services
   become: yes
   systemd:

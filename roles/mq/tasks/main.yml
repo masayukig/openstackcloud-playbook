@@ -11,12 +11,12 @@
     group: root
     mode: "0644"
   become: yes
-- name: Update firewalld setting
-  become: yes
-  command: firewall-cmd --add-service=amqp --permanent
-- name: Reload firewalld setting
-  become: yes
-  command: firewall-cmd --reload
+  #- name: Update firewalld setting
+  #  become: yes
+  #  command: firewall-cmd --add-service=amqp --permanent
+  #- name: Reload firewalld setting
+  #  become: yes
+  #  command: firewall-cmd --reload
 - name: restart rabbitmq service
   systemd:
     name: rabbitmq-server.service

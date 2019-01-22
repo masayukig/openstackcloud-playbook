@@ -36,6 +36,7 @@
   become: yes
 - name: Populate the Identity service database
   command: keystone-manage db_sync
+  become: yes
 - name: Chown /etc/keystone/credential-keys to keystone for a workaround
   become: yes
   file:
