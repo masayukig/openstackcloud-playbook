@@ -40,3 +40,5 @@
       tags: initial-network
     - role: flavors
       tags: flavors
+    - role: security-group
+      tags: security-group
