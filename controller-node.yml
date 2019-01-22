@@ -38,3 +38,5 @@
       tags: discover-compute-hosts
     - role: initial-network
       tags: initial-network
+    - role: flavors
+      tags: flavors

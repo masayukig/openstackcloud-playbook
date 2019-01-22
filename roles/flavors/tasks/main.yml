@@ -1,0 +1,16 @@
+- name: Create flavors
+  os_nova_flavor:
+    cloud: admin
+    state: present
+    name: '{{ item.name }}'
+    ram: '{{ item.ram }}'
+    vcpus: '{{ item.vcpus }}'
+    disk: '{{ item.disk }}'
+  loop:
+    - {name: 'm1.nano',   vcpus: 1, disk:   1, ram:    64}
+    - {name: 'm1.tiny',   vcpus: 1, disk:   1, ram:   512}
+    - {name: 'm1.small',  vcpus: 1, disk:  80, ram:  2048}
+    - {name: 'm1.medium', vcpus: 2, disk:  80, ram:  4096}
+    - {name: 'm1.large',  vcpus: 4, disk:  80, ram:  8192}
+    - {name: 'm1.xlarge', vcpus: 8, disk: 160, ram: 16384}
+
