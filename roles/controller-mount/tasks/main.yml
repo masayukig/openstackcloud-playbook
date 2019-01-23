@@ -1,0 +1,8 @@
+- name: Mount glance image
+  become: yes
+  mount:
+    path: /var/lib/glance/images
+    src: jupiter:/tank/glance/images
+    fstype: nfs
+    state: mounted
+

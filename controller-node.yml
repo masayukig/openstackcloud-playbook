@@ -42,3 +42,5 @@
       tags: flavors
     - role: security-group
       tags: security-group
+    - role: controller-mount
+      tags: controller-mount
