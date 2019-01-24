@@ -44,3 +44,5 @@
       tags: security-group
     - role: controller-mount
       tags: controller-mount
+    - role: image-upload
+      tags: image-upload
