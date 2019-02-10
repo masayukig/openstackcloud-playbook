@@ -1,0 +1,6 @@
+---
+- name: Monitor nodes
+  hosts: ['controller', 'compute']
+  roles:
+    - role: smartctl
+      tags: smartctl

@@ -1,0 +1,7 @@
+- name: Get smartctl -A /dev/sda information
+  command: smartctl -A /dev/sda
+  register: smartctl_out
+  become: yes
+- name: Show smartctl result
+  debug:
+    msg: "{{ smartctl_out.stdout_lines }}"
