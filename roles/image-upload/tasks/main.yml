@@ -8,7 +8,7 @@
     - {url: 'http://cloud.centos.org/centos/7/images/CentOS-7-x86_64-GenericCloud.qcow2', file: 'CentOS-7-x86_64-GenericCloud.qcow2'}
     - {url: 'https://cdimage.debian.org/cdimage/openstack/current-9/debian-9-openstack-amd64.qcow2', file: 'debian-9-openstack-amd64.qcow2'}
     - {url: 'https://download.fedoraproject.org/pub/fedora/linux/releases/29/Cloud/x86_64/images/Fedora-Cloud-Base-29-1.2.x86_64.qcow2', file: 'Fedora-Cloud-Base-29-1.2.x86_64.qcow2'}
-    - {url: 'http://download.opensuse.org/repositories/Cloud:/Images:/Leap_15.0/images/openSUSE-Leap-15.0-OpenStack.x86_64-0.0.4-Buildlp150.12.102.qcow2', file: 'openSUSE-Leap-15.0-OpenStack.x86_64-0.0.4-Buildlp150.12.102.qcow2'}
+    - {url: 'http://download.opensuse.org/repositories/Cloud:/Images:/Leap_15.0/images/openSUSE-Leap-15.0-OpenStack.x86_64-0.0.4-Buildlp150.12.113.qcow2', file: 'openSUSE-Leap-15.0-OpenStack.x86_64-0.0.4-Buildlp150.12.113.qcow2'}
 - name: Image upload
   os_image:
     cloud: admin
@@ -24,5 +24,5 @@
     - {name: 'centos7', file: 'CentOS-7-x86_64-GenericCloud.qcow2'}
     - {name: 'debian9', file: 'debian-9-openstack-amd64.qcow2'}
     - {name: 'fedora29', file: 'Fedora-Cloud-Base-29-1.2.x86_64.qcow2'}
-    - {name: 'opensuse-leap15', file: 'openSUSE-Leap-15.0-OpenStack.x86_64-0.0.4-Buildlp150.12.102.qcow2'}
+    - {name: 'opensuse-leap15', file: 'openSUSE-Leap-15.0-OpenStack.x86_64-0.0.4-Buildlp150.12.113.qcow2'}
 
