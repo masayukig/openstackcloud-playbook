@@ -1,0 +1,6 @@
+---
+- name: Update all packages
+  hosts: ['controller', 'compute', 'storage']
+  roles:
+    - role: zypper-update
+      tags: zypper-update

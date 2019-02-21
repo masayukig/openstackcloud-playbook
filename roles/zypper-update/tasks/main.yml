@@ -1,0 +1,11 @@
+- name: Refresh all repos
+  zypper_repository:
+    repo: '*'
+    runrefresh: yes
+    auto_import_keys: true
+  become: yes
+- name: Update all packages
+  zypper:
+    name: '*'
+    state: latest
+  become: yes
