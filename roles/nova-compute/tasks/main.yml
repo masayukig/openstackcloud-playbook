@@ -22,9 +22,16 @@
     - {src: '010-nova-custom.conf.j2', dest: '/etc/nova/nova.conf.d/010-nova-custom.conf'}
     - {src: 'libvirtd.conf.j2', dest: '/etc/libvirt/libvirtd.conf'}
     - {src: 'nbd.conf.j2', dest: '/etc/modules-load.d/nbd.conf'}
+    - {src: 'dist.conf.j2', dest: '/etc/modprobe.d/dist.conf'}
 - name: Load nbd kernel module
   become: yes
   command: modprobe nbd
+- name: rmmod kvm-intel kernel module
+  become: yes
+  command: rmmod kvm-intel
+- name: load kvm-intel kernel module
+  become: yes
+  command: modprobe kvm-intel
 - name: Start the Compute service including its dependencies and configure them to start automatically when the system boots
   systemd:
     name: '{{ item }}'
