@@ -10,7 +10,29 @@
     - {url: 'https://download.fedoraproject.org/pub/fedora/linux/releases/29/Cloud/x86_64/images/Fedora-Cloud-Base-29-1.2.x86_64.qcow2', file: 'Fedora-Cloud-Base-29-1.2.x86_64.qcow2'}
     - {url: 'https://cloud-images.ubuntu.com/bionic/current/bionic-server-cloudimg-amd64.img', file: 'boinic-server-cloudimg-amd64.img'}
     - {url: 'https://cloud-images.ubuntu.com/disco/current/disco-server-cloudimg-amd64.img', file: 'disco-server-cloudimg-amd64.img'}
-    - {url: 'http://download.opensuse.org/repositories/Cloud:/Images:/Leap_15.0/images/openSUSE-Leap-15.0-OpenStack.x86_64-0.0.4-Buildlp150.12.113.qcow2', file: 'openSUSE-Leap-15.0-OpenStack.x86_64-0.0.4-Buildlp150.12.113.qcow2'}
+    - {url: 'http://download.opensuse.org/repositories/Cloud:/Images:/Leap_15.0/images/openSUSE-Leap-15.0-OpenStack.x86_64-0.0.4-Buildlp150.12.136.qcow2', file: 'openSUSE-Leap-15.0-OpenStack.x86_64-0.0.4-Buildlp150.12.136.qcow2'}
+
+- name: Get Kubic Images
+  vars:
+    kubic_base_url: https://download.opensuse.org/repositories/devel:/kubic:/images/openSUSE_Tumbleweed/
+    image_download_dest_dir: /tmp/
+  get_url:
+    url: '{{ kubic_base_url }}{{ item.filename }}'
+    dest: '/tmp/{{ item.filename }}'
+    # sha256sum: '{{ item.sha256sum }}'
+    #force: True
+  loop:
+    # Skip this image since the kubeadm-cri-o-*-Build23.4 image is corrupt now.
+    #- {filename: 'openSUSE-Tumbleweed-Kubic.x86_64-15.0-kubeadm-cri-o-OpenStack-Cloud-Build23.4.qcow2.xz',
+    #    sha256sum: 'd96b0df639ef19cc4205f66634ccea94560f2ba1ccdcefd45f5449e574dec7bc'}
+    - {filename: 'openSUSE-Tumbleweed-Kubic.x86_64-15.0-MicroOS-podman-OpenStack-Cloud-Build23.4.qcow2.xz',
+        sha256sum: 'f9b53fccc6b0473784182569e30c38bf8ed2ed02afe579a80ab0390bfaa04ec7'}
+
+- name: Image extract
+  command: unxz '/tmp/{{ item }}'
+  loop:
+    #- 'openSUSE-Tumbleweed-Kubic.x86_64-15.0-kubeadm-cri-o-OpenStack-Cloud-Build23.4.qcow2.xz'
+    - 'openSUSE-Tumbleweed-Kubic.x86_64-15.0-MicroOS-podman-OpenStack-Cloud-Build23.4.qcow2.xz'
 - name: Image upload
   os_image:
     cloud: admin
@@ -28,5 +50,7 @@
     - {name: 'fedora29', file: 'Fedora-Cloud-Base-29-1.2.x86_64.qcow2'}
     - {name: 'ubuntu-boinic', file: 'boinic-server-cloudimg-amd64.img'}
     - {name: 'ubuntu-disco', file: 'disco-server-cloudimg-amd64.img'}
-    - {name: 'opensuse-leap15', file: 'openSUSE-Leap-15.0-OpenStack.x86_64-0.0.4-Buildlp150.12.113.qcow2'}
+    - {name: 'opensuse-leap15', file: 'openSUSE-Leap-15.0-OpenStack.x86_64-0.0.4-Buildlp150.12.136.qcow2'}
+    #- {name: 'kubic-kubeadm-cri-o', file: 'openSUSE-Tumbleweed-Kubic.x86_64-15.0-kubeadm-cri-o-OpenStack-Cloud-Build23.4.qcow2'}
+    - {name: 'kubic-microos', file: 'openSUSE-Tumbleweed-Kubic.x86_64-15.0-MicroOS-podman-OpenStack-Cloud-Build23.4.qcow2'}
 
