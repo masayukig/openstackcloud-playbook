@@ -14,4 +14,5 @@
     - {flavorid: '3', name: 'm1.medium', vcpus: 2, disk:  80, ram:  4096}
     - {flavorid: '4', name: 'm1.large',  vcpus: 4, disk:  80, ram:  8192}
     - {flavorid: '5', name: 'm1.xlarge', vcpus: 8, disk: 160, ram: 16384}
+    - {flavorid: '6', name: 'm2.large',  vcpus: 2, disk:  80, ram:  8192}
 
