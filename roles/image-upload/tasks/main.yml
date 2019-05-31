@@ -8,6 +8,7 @@
     - {url: 'http://cloud.centos.org/centos/7/images/CentOS-7-x86_64-GenericCloud.qcow2', file: 'CentOS-7-x86_64-GenericCloud.qcow2'}
     - {url: 'https://cdimage.debian.org/cdimage/openstack/current-9/debian-9-openstack-amd64.qcow2', file: 'debian-9-openstack-amd64.qcow2'}
     - {url: 'https://download.fedoraproject.org/pub/fedora/linux/releases/29/Cloud/x86_64/images/Fedora-Cloud-Base-29-1.2.x86_64.qcow2', file: 'Fedora-Cloud-Base-29-1.2.x86_64.qcow2'}
+    - {url: 'https://cloud-images.ubuntu.com/xenial/current/xenial-server-cloudimg-amd64-disk1.img', file: 'xenial-server-cloudimg-amd64.img'}
     - {url: 'https://cloud-images.ubuntu.com/bionic/current/bionic-server-cloudimg-amd64.img', file: 'boinic-server-cloudimg-amd64.img'}
     - {url: 'https://cloud-images.ubuntu.com/disco/current/disco-server-cloudimg-amd64.img', file: 'disco-server-cloudimg-amd64.img'}
     - {url: 'http://download.opensuse.org/repositories/Cloud:/Images:/Leap_15.0/images/openSUSE-Leap-15.0-OpenStack.x86_64-0.0.4-Buildlp150.12.136.qcow2', file: 'openSUSE-Leap-15.0-OpenStack.x86_64-0.0.4-Buildlp150.12.136.qcow2'}
@@ -48,6 +49,7 @@
     - {name: 'centos7', file: 'CentOS-7-x86_64-GenericCloud.qcow2'}
     - {name: 'debian9', file: 'debian-9-openstack-amd64.qcow2'}
     - {name: 'fedora29', file: 'Fedora-Cloud-Base-29-1.2.x86_64.qcow2'}
+    - {name: 'ubuntu-xenial', file: 'xenial-server-cloudimg-amd64.img'}
     - {name: 'ubuntu-boinic', file: 'boinic-server-cloudimg-amd64.img'}
     - {name: 'ubuntu-disco', file: 'disco-server-cloudimg-amd64.img'}
     - {name: 'opensuse-leap15', file: 'openSUSE-Leap-15.0-OpenStack.x86_64-0.0.4-Buildlp150.12.136.qcow2'}
