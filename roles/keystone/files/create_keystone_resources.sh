@@ -34,4 +34,8 @@ if [ ${MYROLE_ROLE} = 0 ]; then
 	openstack role add --project myproject --user myuser myrole
 fi
 
+USER_ROLE=$(openstack role list | grep -c user)
+if [ ${USER_ROLE} = 0 ]; then
+	openstack role create user
+fi
 
